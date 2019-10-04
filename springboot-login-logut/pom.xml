@@ -42,6 +42,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.github.cage</groupId>
+			<artifactId>cage</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-crypto</artifactId>
 			<version>1.0.0</version>

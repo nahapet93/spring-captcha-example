@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthenticationService } from './auth.service';
-import {Observable, of} from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -36,15 +35,21 @@ export class LoginComponent implements OnInit {
       this.loginSuccess = true;
       this.successMessage = 'Login Successful.';
       this.router.navigate(['/hello-world']);
-    }, () => {
-      this.invalidLogin = true;
-      this.loginSuccess = false;
+    }, (e) => {
+        if (e.message === 'Wrong captcha!') {
+          this.errorMessage = e.message;
+        } else {
+          this.errorMessage = 'Invalid Credentials';
+        }
+        this.drawCaptcha();
+        this.invalidLogin = true;
+        this.loginSuccess = false;
     });
   }
 
   drawCaptcha() {
     this.authenticationService.captchaService().subscribe((result: any) => {
-      this.captchaSrc = `data:image/gif;base64,${JSON.parse(result).value}`;
+      this.captchaSrc = `data:image/jpeg;base64,${JSON.parse(result).value}`;
       this.captchaHash = JSON.parse(result).key;
     }, (e) => {
       console.log(e);
