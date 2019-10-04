@@ -10,28 +10,40 @@ export class AuthenticationService {
   // BASE_PATH: 'http://localhost:8080'
   USER_NAME_SESSION_ATTRIBUTE_NAME = 'authenticatedUser'
 
-  public username: String;
-  public password: String;
+  public username: string;
+  public password: string;
 
   constructor(private http: HttpClient) {
 
   }
 
-  authenticationService(username: String, password: String) {
+  authenticationService(username: string, password: string, captchaHash: string, captchaText: string) {
     return this.http.get(`http://localhost:8080/api/v1/basicauth`,
-      { headers: { authorization: this.createBasicAuthToken(username, password) } }).pipe(map((res) => {
+      { headers: {
+          authorization: this.createBasicAuthToken(username, password),
+          captchaHash,
+          captchaText,
+        }
+      }).pipe(map((res: any) => {
+        if (res.message === 'Wrong captcha!') {
+          throw new Error('Wrong captcha!');
+        }
         this.username = username;
         this.password = password;
         this.registerSuccessfulLogin(username, password);
       }));
   }
 
-  createBasicAuthToken(username: String, password: String) {
-    return 'Basic ' + window.btoa(username + ":" + password)
+  captchaService() {
+    return this.http.get(`http://localhost:8080/api/v1/getimage`, {responseType: 'text'});
+  }
+
+  createBasicAuthToken(username: string, password: string) {
+    return 'Basic ' + window.btoa(username + ':' + password);
   }
 
   registerSuccessfulLogin(username, password) {
-    sessionStorage.setItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME, username)
+    sessionStorage.setItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME, username);
   }
 
   logout() {
@@ -41,14 +53,18 @@ export class AuthenticationService {
   }
 
   isUserLoggedIn() {
-    let user = sessionStorage.getItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME)
-    if (user === null) return false
-    return true
+    const user = sessionStorage.getItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME);
+    if (user === null) {
+      return false;
+    }
+    return true;
   }
 
   getLoggedInUserName() {
-    let user = sessionStorage.getItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME)
-    if (user === null) return ''
-    return user
+    const user = sessionStorage.getItem(this.USER_NAME_SESSION_ATTRIBUTE_NAME);
+    if (user === null) {
+      return '';
+    }
+    return user;
   }
 }
